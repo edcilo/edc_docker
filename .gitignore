@@ -1,0 +1,7 @@
+.env
+
+services/*
+!services/.gitkeep
+
+.idea
+.DS_Store

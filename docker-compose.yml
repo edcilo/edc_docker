@@ -1,0 +1,72 @@
+version: "3.3"
+
+services:
+    edc_proxy_nginx:
+        container_name: edc_proxy_nginx
+        image: nginx:alpine
+        volumes:
+            - ./docker/proxy/sites:/etc/nginx/conf.d
+        ports:
+            - ${PROXY_PORT:-80}:80
+        depends_on:
+            - edc_landing_django
+            - edc_spa_nginx
+        networks:
+            - edciloNet
+
+
+    edc_landing_psql:
+        container_name: edc_landing_psql
+        image: postgres
+        restart: always
+        ports:
+            - ${SERVICE_LANDING_DB_PORT:-5432}:5432
+        volumes:
+            - landingPsqlVolume:/var/lib/postgresql/data
+        environment:
+            POSTGRES_DB: ${SERVICE_LANDING_DB_NAME:-landing}
+            POSTGRES_USER: ${SERVICE_LANDING_DB_USER:-admin}
+            POSTGRES_PASSWORD: ${SERVICE_LANDING_DB_PASS:-secret}
+        networks:
+            - edciloNet
+
+    edc_landing_django:
+        container_name: edc_landing_django
+        build: ./services/landingpage
+        volumes:
+            - ./services/landingpage:/code
+        depends_on:
+            - edc_landing_psql
+        environment:
+            APP_ENV: ${SERVICE_LANDING_ENV:-dev}
+        networks:
+            - edciloNet
+
+
+    edc_spa_node:
+        container_name: edc_spa_node
+        build: ./services/spa
+        volumes:
+            - ./services/spa:/code
+        ports:
+            - ${SPA_VUE_UI:-8001}:8000
+            - ${SPA_VUE_APP:-8002}:8080
+        networks:
+            - edciloNet
+
+    edc_spa_nginx:
+        container_name: edc_spa_nginx
+        image: nginx:alpine
+        volumes:
+            - ./services/spa/dist:/app
+            - ./docker/spa/nginx/sites:/etc/nginx/conf.d
+        networks:
+            - edciloNet
+
+
+networks:
+    edciloNet:
+        driver: "bridge"
+
+volumes:
+    landingPsqlVolume:

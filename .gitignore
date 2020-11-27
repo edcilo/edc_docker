@@ -3,5 +3,8 @@
 services/*
 !services/.gitkeep
 
+docker/letsencrypt/certs/*
+!docker/letsencrypt/certs/.gitkeep
+
 .idea
 .DS_Store

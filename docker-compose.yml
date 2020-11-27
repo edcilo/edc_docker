@@ -3,16 +3,32 @@ version: "3.3"
 services:
     edc_proxy_nginx:
         container_name: edc_proxy_nginx
-        image: nginx:alpine
+        image: jwilder/nginx-proxy
+        restart: always
         volumes:
-            - ./docker/proxy/sites:/etc/nginx/conf.d
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+            - ./docker/letsencrypt/certs:/etc/nginx/certs:ro
+            - /etc/nginx/vhost.d
+            - /usr/share/nginx/html
         ports:
             - ${PROXY_PORT:-80}:80
+            - ${PROXY_SSL_PORT:-443}:443
         depends_on:
             - edc_landing_django
             - edc_spa_nginx
         networks:
             - edciloNet
+        labels:
+            - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
+
+    edc_letsencrypt:
+        image: jrcs/letsencrypt-nginx-proxy-companion
+        restart: always
+        volumes:
+            - ./docker/letsencrypt/certs:/etc/nginx/certs:rw
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        volumes_from:
+            - edc_proxy_nginx:rw
 
 
     edc_landing_psql:
@@ -38,21 +54,13 @@ services:
         depends_on:
             - edc_landing_psql
         environment:
-            APP_ENV: ${SERVICE_LANDING_ENV:-dev}
+            - APP_ENV=dev
+            - VIRTUAL_HOST=${SERVICE_LANDING_DNS}
+            - LETSENCRYPT_HOST=${SERVICE_LANDING_DNS}
+            - LETSENCRYPT_EMAIL=${SSL_LETSENCRYPT_EMAIL}
         networks:
             - edciloNet
 
-
-    edc_spa_node:
-        container_name: edc_spa_node
-        build: ./services/spa
-        volumes:
-            - ./services/spa:/code
-        ports:
-            - ${SPA_VUE_UI:-8001}:8000
-            - ${SPA_VUE_APP:-8002}:8080
-        networks:
-            - edciloNet
 
     edc_spa_nginx:
         container_name: edc_spa_nginx
@@ -60,6 +68,10 @@ services:
         volumes:
             - ./services/spa/dist:/app
             - ./docker/spa/nginx/sites:/etc/nginx/conf.d
+        environment:
+            - VIRTUAL_HOST=${SERVICE_SPA_DNS}
+            - LETSENCRYPT_HOST=${SERVICE_SPA_DNS}
+            - LETSENCRYPT_EMAIL=${SSL_LETSENCRYPT_EMAIL}
         networks:
             - edciloNet
 

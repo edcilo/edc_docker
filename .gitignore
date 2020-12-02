@@ -4,7 +4,12 @@ services/*
 !services/.gitkeep
 
 docker/letsencrypt/certs/*
+docker/letsencrypt/acme/*
 !docker/letsencrypt/certs/.gitkeep
+!docker/letsencrypt/acme/.gitkeep
+
+docker/proxy/*
+!docker/proxy/*/.gitkeep
 
 .idea
 .DS_Store

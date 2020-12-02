@@ -54,7 +54,7 @@ services:
         depends_on:
             - edc_landing_psql
         environment:
-            - APP_ENV=dev
+            - APP_ENV=${SERVICE_LANDING_ENV:-dev}
             - VIRTUAL_HOST=${SERVICE_LANDING_DNS}
             - LETSENCRYPT_HOST=${SERVICE_LANDING_DNS}
             - LETSENCRYPT_EMAIL=${SSL_LETSENCRYPT_EMAIL}

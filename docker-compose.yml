@@ -74,6 +74,7 @@ services:
         restart: always
         volumes:
             - ./services/spa/dist:/app
+            - ./docker/spa/logs:/app/logs
             - ./docker/spa/nginx/sites:/etc/nginx/conf.d
         environment:
             - VIRTUAL_HOST=${SERVICE_SPA_DNS}

@@ -6,7 +6,7 @@ services:
         image: jwilder/nginx-proxy
         restart: always
         volumes:
-            #- ./docker/proxy/dhparam:/etc/nginx/dhparam
+            - ./docker/proxy/dhparam:/etc/nginx/dhparam
             - ./docker/proxy/conf:/etc/nginx/conf.d
             - ./docker/proxy/vhost:/etc/nginx/vhost.d
             - ./docker/proxy/html:/usr/share/nginx/html

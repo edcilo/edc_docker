@@ -11,5 +11,8 @@ docker/letsencrypt/acme/*
 docker/proxy/*
 !docker/proxy/*/.gitkeep
 
+docker/landing/*
+!docker/landing/*/.gitkeep
+
 .idea
 .DS_Store

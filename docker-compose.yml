@@ -55,10 +55,9 @@ services:
         container_name: edc_landing_django
         build: ./services/landingpage
         restart: always
-        ports:
-            - 8001:8000
         volumes:
             - ./services/landingpage:/code
+            - ./docker/landing/static:/code/static
         depends_on:
             - edc_landing_psql
         environment:

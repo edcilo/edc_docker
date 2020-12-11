@@ -11,7 +11,6 @@ services:
             - ./docker/proxy/vhost:/etc/nginx/vhost.d
             - ./docker/proxy/html:/usr/share/nginx/html
             - ./docker/letsencrypt/certs:/etc/nginx/certs:ro
-            - ./docker/landing/static:/code/static:ro
             - /var/run/docker.sock:/tmp/docker.sock:ro
         ports:
             - ${PROXY_PORT:-80}:80
@@ -63,6 +62,18 @@ services:
             - edc_landing_psql
         environment:
             - APP_ENV=${SERVICE_LANDING_ENV:-dev}
+        networks:
+            - edciloNet
+
+    edc_landing_nginx:
+        container_name: edc_landing_nginx
+        image: nginx:alpine
+        volumes:
+            - ./docker/landing/nginx/sites:/etc/nginx/conf.d
+            - ./docker/landing/static:/code/static:ro
+        depends_on:
+            - edc_landing_django
+        environment:
             - VIRTUAL_HOST=${SERVICE_LANDING_DNS}
             - LETSENCRYPT_HOST=${SERVICE_LANDING_DNS}
             - LETSENCRYPT_EMAIL=${SSL_LETSENCRYPT_EMAIL}

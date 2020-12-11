@@ -13,6 +13,7 @@ docker/proxy/*
 
 docker/landing/*
 !docker/landing/*/.gitkeep
+!docker/landing/*/default.conf
 
 .idea
 .DS_Store

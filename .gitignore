@@ -15,5 +15,9 @@ docker/landing/*
 !docker/landing/*/.gitkeep
 !docker/landing/*/default.conf
 
+docker/users/*
+!docker/users/*/.gitkeep
+!docker/users/*/default.conf
+
 .idea
 .DS_Store

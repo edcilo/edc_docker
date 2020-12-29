@@ -88,6 +88,57 @@ services:
             - edciloNet
 
 
+    edc_users_psql:
+        container_name: edc_users_psql
+        image: postgres
+        restart: always
+        ports:
+            - ${SERVICE_USERS_DB_PORT:-5432}:5432
+        volumes:
+            - usersPsqlVolume:/var/lib/postgresql/data
+        environment:
+            POSTGRES_DB: ${SERVICE_USERS_DB_NAME:-users}
+            POSTGRES_USER: ${SERVICE_USERS_DB_USER:-admin}
+            POSTGRES_PASSWORD: ${SERVICE_USERS_DB_PASS:-secret}
+        networks:
+            - edciloNet
+
+    edc_users_django:
+        container_name: edc_users_django
+        build: ./services/users
+        volumes:
+            - ./services/users:/code
+            - ./docker/users/static:/code/static
+        depends_on:
+            - edc_users_psql
+        environment:
+            APP_ENV: ${SERVICE_USERS_ENV:-dev}
+        networks:
+            - edciloNet
+
+    edc_users_nginx:
+        container_name: edc_users_nginx
+        image: nginx:alpine
+        volumes:
+            - ./docker/users/nginx/sites:/etc/nginx/conf.d
+            - ./docker/users/static:/code/static
+        depends_on:
+            - edc_users_django
+        environment:
+            - VIRTUAL_HOST=${SERVICE_USERS_DNS}
+            - LETSENCRYPT_HOST=${SERVICE_USERS_DNS}
+            - LETSENCRYPT_EMAIL=${SSL_LETSENCRYPT_EMAIL}
+        networks:
+            - edciloNet
+
+    edc_users_redis:
+        container_name: edc_users_redis
+        image: redis:6
+        restart: always
+        networks:
+            - edciloNet
+
+
     edc_spa_nginx:
         container_name: edc_spa_nginx
         image: nginx:alpine
@@ -110,3 +161,4 @@ networks:
 
 volumes:
     landingPsqlVolume:
+    usersPsqlVolume:

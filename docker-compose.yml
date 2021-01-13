@@ -35,6 +35,13 @@ services:
             - edc_proxy_nginx:rw
         network_mode: bridge
 
+    edc_redis:
+        container_name: edc_redis
+        image: redis:6
+        restart: always
+        networks:
+            - edciloNet
+
 
     edc_landing_psql:
         container_name: edc_landing_psql
@@ -53,15 +60,14 @@ services:
 
     edc_landing_django:
         container_name: edc_landing_django
-        build: ./services/landingpage
+        image: edcilo/microservice_landingpage:1.0.0
         restart: always
         volumes:
-            - ./services/landingpage:/code
             - ./docker/landing/static:/code/static
         depends_on:
             - edc_landing_psql
-        environment:
-            - APP_ENV=${SERVICE_LANDING_ENV:-dev}
+        env_file:
+            - landing.env
         networks:
             - edciloNet
 
@@ -77,13 +83,6 @@ services:
             - VIRTUAL_HOST=${SERVICE_LANDING_DNS}
             - LETSENCRYPT_HOST=${SERVICE_LANDING_DNS}
             - LETSENCRYPT_EMAIL=${SSL_LETSENCRYPT_EMAIL}
-        networks:
-            - edciloNet
-
-    edc_landing_redis:
-        container_name: edc_landing_redis
-        image: redis:6
-        restart: always
         networks:
             - edciloNet
 
@@ -128,13 +127,6 @@ services:
             - VIRTUAL_HOST=${SERVICE_USERS_DNS}
             - LETSENCRYPT_HOST=${SERVICE_USERS_DNS}
             - LETSENCRYPT_EMAIL=${SSL_LETSENCRYPT_EMAIL}
-        networks:
-            - edciloNet
-
-    edc_users_redis:
-        container_name: edc_users_redis
-        image: redis:6
-        restart: always
         networks:
             - edciloNet
 
